@@ -96,7 +96,7 @@ class AutoCNN:
 
     def evaluate_fitness(self):
         for cnn in self.population:
-            if str(cnn) not in self.fitness:
+            if cnn.hash not in self.fitness:
                 # TODO make this work on multiple GPUs simultaneously
                 self.evaluate_individual_fitness(cnn)
 
@@ -105,7 +105,7 @@ class AutoCNN:
         cnn.train(data, epochs=self.epoch_number)
         loss, accuracy = cnn.evaluate(data)
 
-        self.fitness[str(cnn)] = accuracy
+        self.fitness[cnn.hash] = accuracy
 
     def generate_offsprings(self):
         pass

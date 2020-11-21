@@ -86,10 +86,12 @@ class CNN:
         else:
             self.layers = layers
 
+        self.hash = self.generate_hash()
+
         self.model: tf.keras.Model = None
 
         # TODO change this so that the checkpoint works no matter when you change layer
-        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}/{str(self)}'
+        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{self.hash}/{self.hash}'
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=self.checkpoint_filepath,
             save_weights_only=True,
@@ -97,7 +99,7 @@ class CNN:
             mode='max',
             save_best_only=True)
 
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=f"./logs/train_data/{str(self)}",
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=f"./logs/train_data/{self.hash}",
                                                               update_freq='batch', histogram_freq=1)
 
         self.callbacks = [model_checkpoint_callback, tensorboard_callback]
@@ -128,7 +130,7 @@ class CNN:
         return self.model.evaluate(data['x_test'], data['y_test'], batch_size=batch_size)
 
     def train(self, data, batch_size=64, epochs=1):
-        if self.load_if_exist and os.path.exists(f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}/'):
+        if self.load_if_exist and os.path.exists(f'{CNN.MODEL_BASE_DIRECTORY}/{self.hash}/'):
             self.model.load_weights(self.checkpoint_filepath)
         else:
             if self.model is not None:
@@ -136,8 +138,11 @@ class CNN:
                                validation_split=.2,
                                callbacks=self.callbacks)
 
-    def __repr__(self):
+    def generate_hash(self):
         return '-'.join(map(str, self.layers))
+
+    def __repr__(self):
+        return self.hash
 
 
 def get_layer_from_string(layer_definition):
