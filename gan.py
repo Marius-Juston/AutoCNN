@@ -37,7 +37,7 @@ class AutoCNN:
         self.loss = loss
         self.optimizer = optimizer
 
-        if self.output_layer is None:
+        if output_layer is None:
             self.output_layer = self.get_output_function()
         else:
             self.output_layer = output_layer
