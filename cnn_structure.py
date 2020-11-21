@@ -71,6 +71,7 @@ class CNN:
 
         self.model: tf.keras.Model = None
 
+        # TODO change this so that the checkpoint works no matter when you change layer
         self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}.ckpt'
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=self.checkpoint_filepath,
