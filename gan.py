@@ -87,6 +87,7 @@ class AutoCNN:
                 self.evaluate_individual_fitness(cnn)
 
     def evaluate_individual_fitness(self, cnn: CNN):
+        cnn.generate()
         cnn.train(data, epochs=self.epoch_number)
         loss, accuracy = cnn.model.evaluate(data['x_test'], data['y_test'], batch_size=64)
 
