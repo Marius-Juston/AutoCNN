@@ -67,7 +67,7 @@ class CNN:
 
         self.model: tf.keras.Model = None
 
-        checkpoint_filepath = f'./checkpoints/{str(self)}/'
+        checkpoint_filepath = f'./checkpoints/{str(self)}/{str(self)}'
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=checkpoint_filepath,
             save_weights_only=True,
@@ -87,7 +87,6 @@ class CNN:
             for i, layer in enumerate(self.layers):
                 outputs = layer.tensor_rep(outputs)
 
-            # TODO Change this to a more variable output!!!
             outputs = self.output_function(outputs)
 
             self.model = tf.keras.Model(inputs=inputs, outputs=outputs)
