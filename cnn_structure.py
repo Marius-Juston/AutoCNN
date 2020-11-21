@@ -157,6 +157,8 @@ if __name__ == '__main__':
 
     print(x_train.shape)
 
-    data = {'x_train': x_train, 'y_train': y_train}
+    amount = 100
+
+    data = {'x_train': x_train[:100], 'y_train': y_train[:100]}
 
     cnn.train(data)
