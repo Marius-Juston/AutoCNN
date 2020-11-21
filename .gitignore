@@ -153,3 +153,4 @@ cython_debug/
 
 checkpoints/
 logs/
+fitness.json
