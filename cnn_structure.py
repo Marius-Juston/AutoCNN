@@ -72,7 +72,7 @@ class CNN:
         self.model: tf.keras.Model = None
 
         # TODO change this so that the checkpoint works no matter when you change layer
-        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}.ckpt'
+        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}/{str(self)}'
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=self.checkpoint_filepath,
             save_weights_only=True,
@@ -101,7 +101,7 @@ class CNN:
         return self.model
 
     def train(self, data, batch_size=64, epochs=1):
-        if self.load_if_exist and os.path.exists(self.checkpoint_filepath):
+        if self.load_if_exist and os.path.exists(f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}/'):
             self.model.load_weights(self.checkpoint_filepath)
         else:
             if self.model is not None:
