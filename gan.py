@@ -139,9 +139,9 @@ class AutoCNN:
         return cnn.layers[:split_index], cnn.layers[split_index:]
 
     def generate_offsprings(self):
-        new_population = []
+        offsprings = []
 
-        while len(new_population) < len(self.population):
+        while len(offsprings) < len(self.population):
             p1 = self.select_two_individuals(self.population)
             p2 = self.select_two_individuals(self.population)
 
@@ -157,17 +157,45 @@ class AutoCNN:
                 p1_1.extend(p2_2)
                 p2_1.extend(p1_2)
 
-                o1 = CNN(self.input_shape, self.output_layer, p1_1, optimizer=self.optimizer, loss=self.loss,
-                         metrics=self.metrics)
-
-                o2 = CNN(self.input_shape, self.output_layer, p2_1, optimizer=self.optimizer, loss=self.loss,
-                         metrics=self.metrics)
-
-                new_population.append(o1)
-                new_population.append(o2)
+                offsprings.append(p1_1)
+                offsprings.append(p2_1)
             else:
-                new_population.append(p1)
-                new_population.append(p2)
+                offsprings.append(p1.layers)
+                offsprings.append(p2.layers)
+
+        print(offsprings)
+
+        choices = ['add_skip', 'add_pooling', 'remove', 'change']
+
+        for cnn in offsprings:
+            cnn: list
+
+            r = random.random()
+
+            if r < self.mutation_probability:
+                if len(cnn) == 0:
+                    i = 0
+                    operation = random.choices(choices[:2], weights=self.mutation_operation_distribution[:2])[0]
+                else:
+                    i = random.randint(0, len(cnn) - 1)
+                    operation = random.choices(choices, weights=self.mutation_operation_distribution)[0]
+
+                if operation == 'add_skip':
+                    cnn.insert(i, self.random_skip())
+                elif operation == 'add_pooling':
+                    cnn.insert(i, self.random_pooling())
+                elif operation == 'remove':
+                    cnn.pop(i)
+                else:
+                    if isinstance(cnn[i], SkipLayer):
+                        cnn[i] = self.random_skip()
+                    else:
+                        cnn[i] = self.random_pooling()
+
+        offsprings = [CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
+                          metrics=self.metrics) for layers in offsprings]
+
+        return offsprings
 
 
 if __name__ == '__main__':
