@@ -107,8 +107,49 @@ class AutoCNN:
 
         self.fitness[cnn.hash] = accuracy
 
+    def select_two_individuals(self):
+        cnn1, cnn2 = random.sample(self.population, 2)
+
+        if self.fitness[cnn1.hash] > self.fitness[cnn2.hash]:
+            return cnn1
+        else:
+            return cnn2
+
+    def split_individual(self, cnn: CNN):
+        split_index = random.randint(1, len(cnn.layers) - 1)
+
+        return cnn.layers[:split_index], cnn.layers[split_index:]
+
     def generate_offsprings(self):
-        pass
+        new_population = []
+
+        while len(new_population) < len(self.population):
+            p1 = self.select_two_individuals()
+            p2 = self.select_two_individuals()
+
+            while p1.hash == p2.hash:
+                p2 = self.select_two_individuals()
+
+            r = random.random()
+
+            if r < self.crossover_probability:
+                p1_1, p1_2 = self.split_individual(p1)
+                p2_1, p2_2 = self.split_individual(p2)
+
+                p1_1.extend(p2_2)
+                p2_1.extend(p1_2)
+
+                o1 = CNN(self.input_shape, self.output_layer, p1_1, optimizer=self.optimizer, loss=self.loss,
+                         metrics=self.metrics)
+
+                o2 = CNN(self.input_shape, self.output_layer, p2_1, optimizer=self.optimizer, loss=self.loss,
+                         metrics=self.metrics)
+
+                new_population.append(o1)
+                new_population.append(o2)
+            else:
+                new_population.append(p1)
+                new_population.append(p2)
 
 
 if __name__ == '__main__':
