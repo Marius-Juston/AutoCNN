@@ -1,6 +1,9 @@
 import json
+import os
 import random
 from typing import Dict, Callable, Iterable
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 import tensorflow as tf

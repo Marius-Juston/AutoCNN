@@ -120,7 +120,7 @@ class CNN:
             outputs = self.output_function(outputs)
 
             self.model = tf.keras.Model(inputs=inputs, outputs=outputs)
-            self.model.summary()
+            # self.model.summary()
             self.model.compile(self.optimizer, loss=self.loss, metrics=self.metrics)
 
             SkipLayer.GROUP_NUMBER = 1
