@@ -11,7 +11,12 @@ random.seed(42)
 
 class AutoCNN:
     def get_input_shape(self):
-        return self.dataset['y_train'].shape[1:]
+        shape = self.dataset['x_train'].shape[1:]
+
+        if len(shape) < 3:
+            shape = (*shape, 1)
+
+        return shape
 
     def __init__(self, population_size: int, maximal_generation_number: int, dataset: Dict[str, np.ndarray],
                  output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer]):

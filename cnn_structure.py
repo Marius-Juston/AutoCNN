@@ -66,6 +66,7 @@ class CNN:
         self.model: tf.keras.Model = None
 
     def generate(self):
+        print(self.layers)
         if self.model is None:
             inputs = tf.keras.Input(shape=self.input_shape)
 
@@ -86,7 +87,7 @@ class CNN:
         self.model.compile(self.optimizer, loss=self.loss, metrics=self.metrics)
 
         if self.model is not None:
-            self.model.fit(data['x'], data['y'], batch_size=batch_size, epochs=epochs, validation_split=.2)
+            self.model.fit(data['x_train'], data['y_train'], batch_size=batch_size, epochs=epochs, validation_split=.2)
 
     def __repr__(self):
         return '-'.join(map(str, self.layers))
