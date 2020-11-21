@@ -125,8 +125,8 @@ class AutoCNN:
             with open(self.fitness_cache, 'w') as json_file:
                 json.dump(self.fitness, json_file)
 
-    def select_two_individuals(self):
-        cnn1, cnn2 = random.sample(self.population, 2)
+    def select_two_individuals(self, population):
+        cnn1, cnn2 = random.sample(population, 2)
 
         if self.fitness[cnn1.hash] > self.fitness[cnn2.hash]:
             return cnn1
@@ -142,11 +142,11 @@ class AutoCNN:
         new_population = []
 
         while len(new_population) < len(self.population):
-            p1 = self.select_two_individuals()
-            p2 = self.select_two_individuals()
+            p1 = self.select_two_individuals(self.population)
+            p2 = self.select_two_individuals(self.population)
 
             while p1.hash == p2.hash:
-                p2 = self.select_two_individuals()
+                p2 = self.select_two_individuals(self.population)
 
             r = random.random()
 
