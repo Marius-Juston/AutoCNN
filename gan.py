@@ -134,7 +134,7 @@ class AutoCNN:
             return cnn2
 
     def split_individual(self, cnn: CNN):
-        split_index = random.randint(1, len(cnn.layers) - 1)
+        split_index = random.randint(0, len(cnn.layers))
 
         return cnn.layers[:split_index], cnn.layers[split_index:]
 
