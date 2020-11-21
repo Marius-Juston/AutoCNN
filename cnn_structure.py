@@ -118,6 +118,9 @@ class CNN:
             SkipLayer.GROUP_NUMBER = 1
         return self.model
 
+    def evaluate(self, data, batch_size=64):
+        return self.model.evaluate(data['x_test'], data['y_test'], batch_size=batch_size)
+
     def train(self, data, batch_size=64, epochs=1):
         if self.load_if_exist and os.path.exists(f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}/'):
             self.model.load_weights(self.checkpoint_filepath)
