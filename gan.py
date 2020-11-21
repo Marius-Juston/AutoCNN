@@ -59,7 +59,6 @@ class AutoCNN:
         self.maximal_generation_number = maximal_generation_number
         self.population_size = population_size
         self.population = []
-        self.fitness = dict()
 
         self.population_iteration = 0
 
@@ -70,13 +69,11 @@ class AutoCNN:
 
         self.input_shape = self.get_input_shape()
 
-        self.initialize()
-
     def initialize(self):
         self.population.clear()
 
         for _ in range(self.population_size):
-            depth = random.randint(1, 10)
+            depth = random.randint(1, 5)
 
             layers = []
 
@@ -111,6 +108,8 @@ class AutoCNN:
             if cnn.hash not in self.fitness:
                 # TODO make this work on multiple GPUs simultaneously
                 self.evaluate_individual_fitness(cnn)
+
+            print(self.fitness)
 
     def evaluate_individual_fitness(self, cnn: CNN):
         cnn.generate()
@@ -257,7 +256,9 @@ class AutoCNN:
 if __name__ == '__main__':
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
-    data = {'x_train': x_train, 'y_train': y_train, 'x_test': x_test, 'y_test': y_test}
+    values = x_train.shape[0] // 2
+
+    data = {'x_train': x_train[:values], 'y_train': y_train[:values], 'x_test': x_test, 'y_test': y_test}
 
     a = AutoCNN(5, 1, data)
-    a.evaluate_fitness()
+    a.run()
