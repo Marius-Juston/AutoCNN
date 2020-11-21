@@ -146,18 +146,18 @@ class CNN:
 
 
 def get_layer_from_string(layer_definition):
-    layers: list = layer_definition.split('-')
+    layers_str: list = layer_definition.split('-')
 
-    l = []
+    layers = []
 
-    while len(layers) > 0:
-        if layers[0].isdigit():
-            f = SkipLayer(int(layers[0]), int(layers[0 + 1]))
-            layers.pop(0)
-            layers.pop(0)
+    while len(layers_str) > 0:
+        if layers_str[0].isdigit():
+            f = SkipLayer(int(layers_str[0]), int(layers_str[0 + 1]))
+            layers_str.pop(0)
+            layers_str.pop(0)
         else:
-            f = PoolingLayer(layers[0])
-            layers.pop(0)
-        l.append(f)
+            f = PoolingLayer(layers_str[0])
+            layers_str.pop(0)
+        layers.append(f)
 
-    return l
+    return layers
