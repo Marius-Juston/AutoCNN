@@ -56,11 +56,16 @@ class PoolingLayer(Layer):
 class CNN:
     MODEL_BASE_DIRECTORY = './checkpoints'
 
-    def __init__(self, input_shape, output_function, layers, optimizer=tf.keras.optimizers.Adam(),
+    def __init__(self, input_shape, output_function, layers, optimizer=None,
                  loss='sparse_categorical_crossentropy', metrics=('accuracy',), load_if_exist=True):
         self.load_if_exist = load_if_exist
         self.loss = loss
-        self.optimizer = optimizer
+
+        if optimizer is None:
+            self.optimizer = tf.keras.optimizers.Adam()
+        else:
+            self.optimizer = optimizer
+
         self.metrics = metrics
         self.output_function = output_function
         self.input_shape = input_shape
