@@ -27,15 +27,21 @@ class SkipLayer(Layer):
         SkipLayer.GROUP_NUMBER += 1
 
         skip_layer = tf.keras.layers.Conv2D(self.feature_size1, self.kernel, self.stride, self.convolution,
-                                            activation='relu', name=f'{group_name}/Conv1')(inputs)
+                                            name=f'{group_name}/Conv1')(inputs)
+
+        # FIXME is it the activation first or the batch norm?
+        skip_layer = tf.keras.layers.BatchNormalization(name=f'{group_name}/BatchNorm1')(skip_layer)
+        skip_layer = tf.keras.layers.Activation('relu', name=f'{group_name}/ReLU1')(skip_layer)
+
         skip_layer = tf.keras.layers.Conv2D(self.feature_size2, self.kernel, self.stride, self.convolution,
                                             name=f'{group_name}/Conv2')(skip_layer)
+        skip_layer = tf.keras.layers.BatchNormalization(name=f'{group_name}/BatchNorm2')(skip_layer)
 
         # Makes sure that the dimensionality at the skip layers are the same
         inputs = tf.keras.layers.Conv2D(self.feature_size2, (1, 1), self.stride, name=f'{group_name}/Reshape')(inputs)
 
         outputs = tf.keras.layers.add([inputs, skip_layer], name=f'{group_name}/Add')
-        return tf.keras.layers.Activation('relu', name=f'{group_name}/ReLU')(outputs)
+        return tf.keras.layers.Activation('relu', name=f'{group_name}/ReLU2')(outputs)
 
     def __repr__(self):
         return f'{self.feature_size1}-{self.feature_size2}'
