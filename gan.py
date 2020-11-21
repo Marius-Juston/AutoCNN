@@ -11,7 +11,7 @@ random.seed(42)
 
 class AutoCNN:
     def get_input_shape(self):
-        return (32, 32, 3)
+        return self.dataset['y_train'].shape[1:]
 
     def __init__(self, population_size: int, maximal_generation_number: int, dataset: Dict[str, np.ndarray],
                  output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer]):
@@ -60,7 +60,11 @@ if __name__ == '__main__':
         return tf.keras.layers.Dense(10, activation='softmax')(out)
 
 
-    a = AutoCNN(10, 3, None, output_function)
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+    data = {'x_train': x_train, 'y_train': y_train, 'x_test': x_test, 'y_test': y_test}
+
+    a = AutoCNN(10, 3, data, output_function)
 
     print(a.population)
     a.population[0].generate()
