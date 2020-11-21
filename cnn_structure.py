@@ -142,6 +142,6 @@ if __name__ == '__main__':
 
     print(x_train.shape)
 
-    data = {'x': x_train, 'y': y_train}
+    data = {'x_train': x_train, 'y_train': y_train}
 
     cnn.train(data)
