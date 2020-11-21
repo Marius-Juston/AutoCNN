@@ -36,20 +36,18 @@ class AutoCNN:
         self.metrics = metrics
         self.loss = loss
         self.optimizer = optimizer
-
-        if output_layer is None:
-            self.output_layer = self.get_output_function()
-        else:
-            self.output_layer = output_layer
-
         self.dataset = dataset
-
         self.maximal_generation_number = maximal_generation_number
         self.population_size = population_size
         self.population = []
         self.fitness = dict()
 
         self.population_iteration = 0
+
+        if output_layer is None:
+            self.output_layer = self.get_output_function()
+        else:
+            self.output_layer = output_layer
 
         self.input_shape = self.get_input_shape()
 
