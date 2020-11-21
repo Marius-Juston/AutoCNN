@@ -86,26 +86,30 @@ class AutoCNN:
                 r = random.random()
 
                 if r < .5:
-                    f1 = 2 ** random.randint(5, 9)
-                    f2 = 2 ** random.randint(5, 9)
-
-                    layers.append(SkipLayer(f1, f2))
-
+                    layers.append(self.random_skip())
                 else:
-                    q = random.random()
-
-                    if q < .5:
-                        layers.append(PoolingLayer('max'))
-                    else:
-                        layers.append(PoolingLayer('mean'))
+                    layers.append(self.random_pooling())
 
             cnn = CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
                       metrics=self.metrics)
 
             self.population.append(cnn)
 
-    def evaluate_fitness(self):
-        for cnn in self.population:
+    def random_skip(self):
+        f1 = 2 ** random.randint(5, 9)
+        f2 = 2 ** random.randint(5, 9)
+        return SkipLayer(f1, f2)
+
+    def random_pooling(self):
+        q = random.random()
+
+        if q < .5:
+            return PoolingLayer('max')
+        else:
+            return PoolingLayer('mean')
+
+    def evaluate_fitness(self, population):
+        for cnn in population:
             if cnn.hash not in self.fitness:
                 # TODO make this work on multiple GPUs simultaneously
                 self.evaluate_individual_fitness(cnn)
