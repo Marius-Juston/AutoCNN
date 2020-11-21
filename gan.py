@@ -226,6 +226,36 @@ class AutoCNN:
 
         return new_population
 
+    def run(self):
+        print("Initializing Population")
+        self.initialize()
+        print("Population Initialization Done:", self.population)
+
+        for i in range(self.maximal_generation_number):
+            print("Generation 1")
+
+            print("Evaluating Population fitness")
+            self.evaluate_fitness(self.population)
+            print("Evaluating Population fitness Done:", self.fitness)
+
+            print("Generating Offsprings")
+            offsprings = self.generate_offsprings()
+            print("Generating Offsprings Done:", offsprings)
+
+            print("Evaluating Offsprings")
+            self.evaluate_fitness(offsprings)
+            print("Evaluating Offsprings Done:", self.fitness)
+
+            print("Selecting new environment")
+            new_population = self.environmental_selection(offsprings)
+            print("Selecting new environment Done:", new_population)
+
+            self.population = new_population
+
+        best_cnn = sorted(self.population, key=lambda x: self.fitness[x.hash])[-1]
+        print("Best CNN:", best_cnn, "Score:", self.fitness[best_cnn.hash])
+
+
 if __name__ == '__main__':
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
