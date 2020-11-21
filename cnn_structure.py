@@ -139,22 +139,23 @@ class CNN:
     def __repr__(self):
         return '-'.join(map(str, self.layers))
 
-    def define_from_string(self, layer_definition):
-        layers: list = layer_definition.split('-')
 
-        l = []
+def get_layer_from_string(layer_definition):
+    layers: list = layer_definition.split('-')
 
-        while len(layers) > 0:
-            if layers[0].isdigit():
-                f = SkipLayer(int(layers[0]), int(layers[0 + 1]))
-                layers.pop(0)
-                layers.pop(0)
-            else:
-                f = PoolingLayer(layers[0])
-                layers.pop(0)
-            l.append(f)
+    l = []
 
-        self.layers = l
+    while len(layers) > 0:
+        if layers[0].isdigit():
+            f = SkipLayer(int(layers[0]), int(layers[0 + 1]))
+            layers.pop(0)
+            layers.pop(0)
+        else:
+            f = PoolingLayer(layers[0])
+            layers.pop(0)
+        l.append(f)
+
+    return l
 
 
 if __name__ == '__main__':
