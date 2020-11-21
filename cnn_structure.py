@@ -161,27 +161,3 @@ def get_layer_from_string(layer_definition):
         l.append(f)
 
     return l
-
-
-if __name__ == '__main__':
-    def output_function(inputs):
-        out = tf.keras.layers.Flatten()(inputs)
-
-        return tf.keras.layers.Dense(10, activation='softmax')(out)
-
-
-    cnn = CNN((28, 28, 1), output_function,
-              layers=[SkipLayer(32, 64), PoolingLayer('max'), SkipLayer(128, 256), PoolingLayer('mean'),
-                      SkipLayer(512, 256), SkipLayer(256, 512)])
-
-    cnn.generate()
-
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-
-    print(x_train.shape)
-
-    amount = 100
-
-    data = {'x_train': x_train[:100], 'y_train': y_train[:100]}
-
-    cnn.train(data)
