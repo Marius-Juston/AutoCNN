@@ -13,6 +13,8 @@ class Layer(ABC):
 
 
 class SkipLayer(Layer):
+    GROUP_NUMBER = 1
+
     def __init__(self, feature_size1, feature_size2, kernel=(3, 3), stride=(1, 1), convolution='same'):
         self.convolution = convolution
         self.stride = stride
@@ -21,15 +23,19 @@ class SkipLayer(Layer):
         self.feature_size1 = feature_size1
 
     def tensor_rep(self, inputs):
+        group_name = f'SkipLayer_{SkipLayer.GROUP_NUMBER}'
+        SkipLayer.GROUP_NUMBER += 1
+
         skip_layer = tf.keras.layers.Conv2D(self.feature_size1, self.kernel, self.stride, self.convolution,
-                                            activation='relu')(inputs)
-        skip_layer = tf.keras.layers.Conv2D(self.feature_size2, self.kernel, self.stride, self.convolution)(skip_layer)
+                                            activation='relu', name=f'{group_name}/Conv1')(inputs)
+        skip_layer = tf.keras.layers.Conv2D(self.feature_size2, self.kernel, self.stride, self.convolution,
+                                            name=f'{group_name}/Conv2')(skip_layer)
 
         # Makes sure that the dimensionality at the skip layers are the same
-        inputs = tf.keras.layers.Conv2D(self.feature_size2, (1, 1), self.stride)(inputs)
+        inputs = tf.keras.layers.Conv2D(self.feature_size2, (1, 1), self.stride, name=f'{group_name}/Reshape')(inputs)
 
-        outputs = tf.keras.layers.add([inputs, skip_layer])
-        return tf.keras.layers.Activation('relu')(outputs)
+        outputs = tf.keras.layers.add([inputs, skip_layer], name=f'{group_name}/Add')
+        return tf.keras.layers.Activation('relu', name=f'{group_name}/ReLU')(outputs)
 
     def __repr__(self):
         return f'{self.feature_size1}-{self.feature_size2}'
@@ -95,6 +101,7 @@ class CNN:
 
         if self.model is None:
             tf.keras.backend.clear_session()  # Fixes graph appending
+            SkipLayer.GROUP_NUMBER = 1
             inputs = tf.keras.Input(shape=self.input_shape)
 
             outputs = inputs
@@ -108,6 +115,7 @@ class CNN:
             self.model.summary()
             self.model.compile(self.optimizer, loss=self.loss, metrics=self.metrics)
 
+            SkipLayer.GROUP_NUMBER = 1
         return self.model
 
     def train(self, data, batch_size=64, epochs=1):
