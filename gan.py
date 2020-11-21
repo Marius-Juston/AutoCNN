@@ -1,5 +1,5 @@
 import random
-from typing import Dict, Callable
+from typing import Dict, Callable, Iterable
 
 import numpy as np
 import tensorflow as tf
@@ -30,8 +30,19 @@ class AutoCNN:
 
     def __init__(self, population_size: int, maximal_generation_number: int, dataset: Dict[str, np.ndarray],
                  output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer] = None, epoch_number: int = 1,
-                 optimizer=tf.keras.optimizers.Adam(),
-                 loss='sparse_categorical_crossentropy', metrics=('accuracy',)):
+                 optimizer=tf.keras.optimizers.SGD(.1, .9),
+                 loss='sparse_categorical_crossentropy', metrics=('accuracy',), crossover_probability: float = .9,
+                 mutation_probability: float = .2, mutation_operation_distribution: Iterable[float] = None):
+
+        l = 4
+
+        if mutation_operation_distribution is None:
+            self.mutation_operation_distribution = [1 / l for _ in range(l)]
+        else:
+            self.mutation_operation_distribution = mutation_operation_distribution
+
+        self.mutation_probability = mutation_probability
+        self.crossover_probability = crossover_probability
         self.epoch_number = epoch_number
         self.metrics = metrics
         self.loss = loss
@@ -95,6 +106,9 @@ class AutoCNN:
         loss, accuracy = cnn.evaluate(data)
 
         self.fitness[str(cnn)] = accuracy
+
+    def generate_offsprings(self):
+        pass
 
 
 if __name__ == '__main__':
