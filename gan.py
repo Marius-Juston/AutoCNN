@@ -41,7 +41,7 @@ class AutoCNN:
 
         self.fitness_cache = fitness_cache
 
-        if self.fitness_cache is not None:
+        if self.fitness_cache is not None and os.path.exists(self.fitness_cache):
             with open(self.fitness_cache) as cache:
                 self.fitness = json.load(cache)
         else:
