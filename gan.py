@@ -197,6 +197,34 @@ class AutoCNN:
 
         return offsprings
 
+    def environmental_selection(self, offsprings):
+        for cnn in offsprings:
+            if cnn.hash not in self.fitness:
+                # TODO make this work on multiple GPUs simultaneously
+                self.evaluate_individual_fitness(cnn)
+
+            print(self.fitness)
+
+        whole_population = list(self.population)
+        whole_population.extend(offsprings)
+
+        new_population = []
+
+        while len(new_population) < len(self.population):
+            p = self.select_two_individuals(whole_population)
+
+            new_population.append(p)
+
+        sorted_population = sorted(whole_population, key=lambda x: self.fitness[x.hash])
+        best_cnn = sorted_population[-1]
+
+        print("Best CNN:", best_cnn, "Score:", self.fitness[best_cnn.hash])
+
+        if best_cnn not in new_population:
+            new_population.remove(sorted_population[0])
+            new_population.append(best_cnn)
+
+        return new_population
 
 if __name__ == '__main__':
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
