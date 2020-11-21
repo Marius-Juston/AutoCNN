@@ -44,10 +44,8 @@ class AutoCNN:
         else:
             self.fitness = dict()
 
-        l = 4
-
         if mutation_operation_distribution is None:
-            self.mutation_operation_distribution = [1 / l for _ in range(l)]
+            self.mutation_operation_distribution = (.7, .1, .1, .1)
         else:
             self.mutation_operation_distribution = mutation_operation_distribution
 
