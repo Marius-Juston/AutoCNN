@@ -91,7 +91,7 @@ class CNN:
         self.model: tf.keras.Model = None
 
         # TODO change this so that the checkpoint works no matter when you change layer
-        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{self.hash}/{self.hash}'
+        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{self.hash}/model_{self.hash}'
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=self.checkpoint_filepath,
             save_weights_only=True,
@@ -99,7 +99,7 @@ class CNN:
             mode='max',
             save_best_only=True)
 
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=f"./logs/train_data/{self.hash}",
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=f"./logs/train_data/model_{self.hash}",
                                                               update_freq='batch', histogram_freq=1)
 
         self.callbacks = [model_checkpoint_callback, tensorboard_callback]
