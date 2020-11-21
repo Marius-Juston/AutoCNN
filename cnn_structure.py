@@ -92,7 +92,9 @@ class CNN:
 
     def generate(self):
         print(self.layers)
+
         if self.model is None:
+            tf.keras.backend.clear_session()  # Fixes graph appending
             inputs = tf.keras.Input(shape=self.input_shape)
 
             outputs = inputs
