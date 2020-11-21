@@ -1,3 +1,4 @@
+import os
 from abc import abstractmethod, ABC
 
 import tensorflow as tf
@@ -53,8 +54,11 @@ class PoolingLayer(Layer):
 
 
 class CNN:
+    MODEL_BASE_DIRECTORY = './checkpoints'
+
     def __init__(self, input_shape, output_function, layers=None, optimizer=tf.keras.optimizers.Adam(),
-                 loss='sparse_categorical_crossentropy', metrics=('accuracy',)):
+                 loss='sparse_categorical_crossentropy', metrics=('accuracy',), load_if_exist=True):
+        self.load_if_exist = load_if_exist
         self.loss = loss
         self.optimizer = optimizer
         self.metrics = metrics
@@ -67,9 +71,9 @@ class CNN:
 
         self.model: tf.keras.Model = None
 
-        checkpoint_filepath = f'./checkpoints/{str(self)}/{str(self)}'
+        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}/{str(self)}'
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-            filepath=checkpoint_filepath,
+            filepath=self.checkpoint_filepath,
             save_weights_only=True,
             monitor='val_accuracy',
             mode='max',
@@ -91,15 +95,18 @@ class CNN:
 
             self.model = tf.keras.Model(inputs=inputs, outputs=outputs)
             self.model.summary()
+            self.model.compile(self.optimizer, loss=self.loss, metrics=self.metrics)
 
         return self.model
 
     def train(self, data, batch_size=64, epochs=1):
-        self.model.compile(self.optimizer, loss=self.loss, metrics=self.metrics)
-
-        if self.model is not None:
-            self.model.fit(data['x_train'], data['y_train'], batch_size=batch_size, epochs=epochs, validation_split=.2,
-                           callbacks=self.callbacks)
+        if self.load_if_exist and os.path.exists(f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}'):
+            self.model.load_weights(self.checkpoint_filepath)
+        else:
+            if self.model is not None:
+                self.model.fit(data['x_train'], data['y_train'], batch_size=batch_size, epochs=epochs,
+                               validation_split=.2,
+                               callbacks=self.callbacks)
 
     def __repr__(self):
         return '-'.join(map(str, self.layers))
