@@ -1,3 +1,4 @@
+import json
 import random
 from typing import Dict, Callable, Iterable
 
@@ -32,7 +33,16 @@ class AutoCNN:
                  output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer] = None, epoch_number: int = 1,
                  optimizer=tf.keras.optimizers.SGD(.1, .9),
                  loss='sparse_categorical_crossentropy', metrics=('accuracy',), crossover_probability: float = .9,
-                 mutation_probability: float = .2, mutation_operation_distribution: Iterable[float] = None):
+                 mutation_probability: float = .2, mutation_operation_distribution: Iterable[float] = None,
+                 fitness_cache='fitness.json'):
+
+        self.fitness_cache = fitness_cache
+
+        if self.fitness_cache is not None:
+            with open(self.fitness_cache) as cache:
+                self.fitness = json.load(cache)
+        else:
+            self.fitness = dict()
 
         l = 4
 
@@ -106,6 +116,10 @@ class AutoCNN:
         loss, accuracy = cnn.evaluate(data)
 
         self.fitness[cnn.hash] = accuracy
+
+        if self.fitness_cache is not None:
+            with open(self.fitness_cache, 'w') as json_file:
+                json.dump(self.fitness, json_file)
 
     def select_two_individuals(self):
         cnn1, cnn2 = random.sample(self.population, 2)
