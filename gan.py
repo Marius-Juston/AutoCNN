@@ -18,15 +18,30 @@ class AutoCNN:
 
         return shape
 
+    def get_output_function(self):
+        output_size = len(set(self.dataset['y_train']))
+
+        def output_function(inputs):
+            out = tf.keras.layers.Flatten()(inputs)
+
+            return tf.keras.layers.Dense(output_size, activation='softmax')(out)
+
+        return output_function
+
     def __init__(self, population_size: int, maximal_generation_number: int, dataset: Dict[str, np.ndarray],
-                 output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer], epoch_number: int = 1,
+                 output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer] = None, epoch_number: int = 1,
                  optimizer=tf.keras.optimizers.Adam(),
                  loss='sparse_categorical_crossentropy', metrics=('accuracy',)):
         self.epoch_number = epoch_number
         self.metrics = metrics
         self.loss = loss
         self.optimizer = optimizer
-        self.output_layer = output_layer
+
+        if self.output_layer is None:
+            self.output_layer = self.get_output_function()
+        else:
+            self.output_layer = output_layer
+
         self.dataset = dataset
 
         self.maximal_generation_number = maximal_generation_number
@@ -70,6 +85,7 @@ class AutoCNN:
     def evaluate_fitness(self):
         for cnn in self.population:
             if str(cnn) not in self.fitness:
+                # TODO make this work on multiple GPUs simultaneously
                 self.evaluate_individual_fitness(cnn)
 
     def evaluate_individual_fitness(self, cnn: CNN):
@@ -80,17 +96,11 @@ class AutoCNN:
 
 
 if __name__ == '__main__':
-    def output_function(inputs):
-        out = tf.keras.layers.Flatten()(inputs)
-
-        return tf.keras.layers.Dense(10, activation='softmax')(out)
-
-
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
     data = {'x_train': x_train, 'y_train': y_train, 'x_test': x_test, 'y_test': y_test}
 
-    a = AutoCNN(5, 1, data, output_function)
+    a = AutoCNN(5, 1, data)
 
     print(a.population)
     a.population[0].generate()
