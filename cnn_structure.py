@@ -56,7 +56,7 @@ class PoolingLayer(Layer):
 class CNN:
     MODEL_BASE_DIRECTORY = './checkpoints'
 
-    def __init__(self, input_shape, output_function, layers=None, optimizer=tf.keras.optimizers.Adam(),
+    def __init__(self, input_shape, output_function, layers, optimizer=tf.keras.optimizers.Adam(),
                  loss='sparse_categorical_crossentropy', metrics=('accuracy',), load_if_exist=True):
         self.load_if_exist = load_if_exist
         self.loss = loss
@@ -71,7 +71,7 @@ class CNN:
 
         self.model: tf.keras.Model = None
 
-        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}/{str(self)}'
+        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}.ckpt'
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=self.checkpoint_filepath,
             save_weights_only=True,
@@ -100,7 +100,7 @@ class CNN:
         return self.model
 
     def train(self, data, batch_size=64, epochs=1):
-        if self.load_if_exist and os.path.exists(f'{CNN.MODEL_BASE_DIRECTORY}/{str(self)}'):
+        if self.load_if_exist and os.path.exists(self.checkpoint_filepath):
             self.model.load_weights(self.checkpoint_filepath)
         else:
             if self.model is not None:
@@ -110,9 +110,6 @@ class CNN:
 
     def __repr__(self):
         return '-'.join(map(str, self.layers))
-
-    def append(self, layer):
-        self.layers.append(layer)
 
     def define_from_string(self, layer_definition):
         layers: list = layer_definition.split('-')

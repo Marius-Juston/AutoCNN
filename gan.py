@@ -58,8 +58,8 @@ class AutoCNN:
 
         for _ in range(self.population_size):
             depth = random.randint(1, 10)
-            cnn = CNN(self.input_shape, self.output_layer, optimizer=self.optimizer, loss=self.loss,
-                      metrics=self.metrics)
+
+            layers = []
 
             for i in range(depth):
                 r = random.random()
@@ -68,15 +68,18 @@ class AutoCNN:
                     f1 = 2 ** random.randint(5, 9)
                     f2 = 2 ** random.randint(5, 9)
 
-                    cnn.append(SkipLayer(f1, f2))
+                    layers.append(SkipLayer(f1, f2))
 
                 else:
                     q = random.random()
 
                     if q < .5:
-                        cnn.append(PoolingLayer('max'))
+                        layers.append(PoolingLayer('max'))
                     else:
-                        cnn.append(PoolingLayer('mean'))
+                        layers.append(PoolingLayer('mean'))
+
+            cnn = CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
+                      metrics=self.metrics)
 
             self.population.append(cnn)
 
@@ -100,6 +103,4 @@ if __name__ == '__main__':
     data = {'x_train': x_train, 'y_train': y_train, 'x_test': x_test, 'y_test': y_test}
 
     a = AutoCNN(5, 1, data)
-
-    print(a.population)
-    a.population[0].generate()
+    a.evaluate_fitness()
