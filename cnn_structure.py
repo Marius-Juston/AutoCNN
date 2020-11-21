@@ -85,7 +85,10 @@ class CNN:
             mode='max',
             save_best_only=True)
 
-        self.callbacks = [model_checkpoint_callback]
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=f"./logs/train_data/{str(self)}",
+                                                              update_freq='batch', histogram_freq=1)
+
+        self.callbacks = [model_checkpoint_callback, tensorboard_callback]
 
     def generate(self):
         print(self.layers)
