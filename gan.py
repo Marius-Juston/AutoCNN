@@ -215,13 +215,14 @@ class AutoCNN:
 
             new_population.append(p)
 
-        sorted_population = sorted(whole_population, key=lambda x: self.fitness[x.hash])
-        best_cnn = sorted_population[-1]
+        best_cnn = max(whole_population, key=lambda x: self.fitness[x.hash])
 
         print("Best CNN:", best_cnn, "Score:", self.fitness[best_cnn.hash])
 
         if best_cnn not in new_population:
-            new_population.remove(sorted_population[0])
+            worst_cnn = min(new_population, key=lambda x: self.fitness[x.hash])
+            print("Worst CNN:", worst_cnn, "Score:", self.fitness[worst_cnn.hash])
+            new_population.remove(worst_cnn)
             new_population.append(best_cnn)
 
         return new_population
