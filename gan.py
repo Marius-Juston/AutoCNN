@@ -34,7 +34,7 @@ class AutoCNN:
 
     def __init__(self, population_size: int, maximal_generation_number: int, dataset: Dict[str, np.ndarray],
                  output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer] = None, epoch_number: int = 1,
-                 optimizer=tf.keras.optimizers.SGD(.1, .9),
+                 optimizer=tf.keras.optimizers.Adam(),
                  loss='sparse_categorical_crossentropy', metrics=('accuracy',), crossover_probability: float = .9,
                  mutation_probability: float = .2, mutation_operation_distribution: Iterable[float] = None,
                  fitness_cache='fitness.json'):
