@@ -1,7 +1,9 @@
 import json
 import os
 import random
-from typing import Dict, Callable, Iterable
+from typing import Dict, Callable, Iterable, Union
+
+from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -34,13 +36,21 @@ class AutoCNN:
 
         return output_function
 
-    def __init__(self, population_size: int, maximal_generation_number: int, dataset: Dict[str, np.ndarray],
-                 output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer] = None, epoch_number: int = 1,
-                 optimizer=tf.keras.optimizers.Adam(),
-                 loss='sparse_categorical_crossentropy', metrics=('accuracy',), crossover_probability: float = .9,
-                 mutation_probability: float = .2, mutation_operation_distribution: Iterable[float] = None,
-                 fitness_cache='fitness.json'):
+    def __init__(self, population_size: int,
+                 maximal_generation_number: int,
+                 dataset: Dict[str, np.ndarray],
+                 output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer] = None,
+                 epoch_number: int = 1,
+                 optimizer: OptimizerV2 = tf.keras.optimizers.Adam(),
+                 loss: Union[str, tf.keras.losses.Loss] = 'sparse_categorical_crossentropy',
+                 metrics=('accuracy',),
+                 crossover_probability: float = .9,
+                 mutation_probability: float = .2,
+                 mutation_operation_distribution: Iterable[float] = None,
+                 fitness_cache: str = 'fitness.json',
+                 extra_callbacks: Iterable[tf.keras.callbacks.Callback] = 2):
 
+        self.extra_callbacks = extra_callbacks
         self.fitness_cache = fitness_cache
 
         if self.fitness_cache is not None and os.path.exists(self.fitness_cache):
