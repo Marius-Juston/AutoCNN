@@ -25,7 +25,7 @@ class AutoCNN:
         return shape
 
     def get_output_function(self):
-        output_size = len(set(self.dataset['y_train']))
+        output_size = np.unique(self.dataset['y_train']).shape[0]
 
         def output_function(inputs):
             out = tf.keras.layers.Flatten()(inputs)
