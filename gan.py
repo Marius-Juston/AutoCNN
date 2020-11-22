@@ -115,9 +115,14 @@ class AutoCNN:
             print(self.fitness)
 
     def evaluate_individual_fitness(self, cnn: CNN):
-        cnn.generate()
-        cnn.train(data, epochs=self.epoch_number)
-        loss, accuracy = cnn.evaluate(data)
+        try:
+            cnn.generate()
+
+            cnn.train(data, epochs=self.epoch_number)
+            loss, accuracy = cnn.evaluate(data)
+        except ValueError as e:
+            print(e)
+            accuracy = 0
 
         self.fitness[cnn.hash] = accuracy
 
