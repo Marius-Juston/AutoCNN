@@ -112,7 +112,7 @@ class AutoCNN:
                 # TODO make this work on multiple GPUs simultaneously
                 self.evaluate_individual_fitness(cnn)
 
-            print(self.fitness)
+            print(cnn, self.fitness[cnn.hash])
 
     def evaluate_individual_fitness(self, cnn: CNN):
         try:
@@ -167,8 +167,6 @@ class AutoCNN:
             else:
                 offsprings.append(p1.layers)
                 offsprings.append(p2.layers)
-
-        print(offsprings)
 
         choices = ['add_skip', 'add_pooling', 'remove', 'change']
 
@@ -238,7 +236,7 @@ class AutoCNN:
         print("Population Initialization Done:", self.population)
 
         for i in range(self.maximal_generation_number):
-            print("Generation 1")
+            print("Generation", i)
 
             print("Evaluating Population fitness")
             self.evaluate_fitness(self.population)
