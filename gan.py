@@ -8,6 +8,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import numpy as np
 import tensorflow as tf
 
+tf.get_logger().setLevel('INFO')
+
 from cnn_structure import SkipLayer, PoolingLayer, CNN
 
 random.seed(42)
