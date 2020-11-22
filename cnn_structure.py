@@ -69,7 +69,7 @@ class CNN:
     MODEL_BASE_DIRECTORY = './checkpoints'
 
     def __init__(self, input_shape, output_function, layers, optimizer=None,
-                 loss='sparse_categorical_crossentropy', metrics=('accuracy',), load_if_exist=True):
+                 loss='sparse_categorical_crossentropy', metrics=('accuracy',), load_if_exist=True, extra_callbacks=None):
         self.load_if_exist = load_if_exist
         self.loss = loss
 
@@ -103,6 +103,9 @@ class CNN:
                                                               update_freq='batch', histogram_freq=1)
 
         self.callbacks = [model_checkpoint_callback, tensorboard_callback]
+
+        if extra_callbacks is not None:
+            self.callbacks.extend(extra_callbacks)
 
     def generate(self):
         print(self.layers)
