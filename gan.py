@@ -273,7 +273,7 @@ def cifar10_test():
 
     data = {'x_train': x_train[:values], 'y_train': y_train[:values], 'x_test': x_test, 'y_test': y_test}
 
-    a = AutoCNN(5, 1, data)
+    a = AutoCNN(20, 10, data, epoch_number=10)
     a.run()
 
 
