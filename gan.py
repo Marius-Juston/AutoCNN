@@ -120,8 +120,8 @@ class AutoCNN:
         try:
             cnn.generate()
 
-            cnn.train(data, epochs=self.epoch_number)
-            loss, accuracy = cnn.evaluate(data)
+            cnn.train(self.dataset, epochs=self.epoch_number)
+            loss, accuracy = cnn.evaluate(self.dataset)
         except ValueError as e:
             print(e)
             accuracy = 0
