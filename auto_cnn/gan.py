@@ -3,16 +3,15 @@ import os
 import random
 from typing import Dict, Callable, Iterable, Union
 
-from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
 
 tf.get_logger().setLevel('INFO')
 
-from cnn_structure import SkipLayer, PoolingLayer, CNN
+from auto_cnn.cnn_structure import SkipLayer, PoolingLayer, CNN
 
 random.seed(42)
 
@@ -48,7 +47,7 @@ class AutoCNN:
                  mutation_probability: float = .2,
                  mutation_operation_distribution: Iterable[float] = None,
                  fitness_cache: str = 'fitness.json',
-                 extra_callbacks: Iterable[tf.keras.callbacks.Callback] = 2):
+                 extra_callbacks: Iterable[tf.keras.callbacks.Callback] = None):
 
         self.extra_callbacks = extra_callbacks
         self.fitness_cache = fitness_cache
