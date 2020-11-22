@@ -66,10 +66,11 @@ class PoolingLayer(Layer):
 
 
 class CNN:
-    MODEL_BASE_DIRECTORY = './checkpoints'
-
     def __init__(self, input_shape, output_function, layers, optimizer=None,
-                 loss='sparse_categorical_crossentropy', metrics=('accuracy',), load_if_exist=True, extra_callbacks=None):
+                 loss='sparse_categorical_crossentropy', metrics=('accuracy',), load_if_exist=True,
+                 extra_callbacks=None, logs_dir='./logs/train_data', checkpoint_dir='./checkpoints'):
+        self.checkpoint_dir = checkpoint_dir
+        self.logs_dir = logs_dir
         self.load_if_exist = load_if_exist
         self.loss = loss
 
@@ -91,7 +92,7 @@ class CNN:
         self.model: tf.keras.Model = None
 
         # TODO change this so that the checkpoint works no matter when you change layer
-        self.checkpoint_filepath = f'{CNN.MODEL_BASE_DIRECTORY}/model_{self.hash}/model_{self.hash}'
+        self.checkpoint_filepath = f'{self.checkpoint_dir}/model_{self.hash}/model_{self.hash}'
         model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=self.checkpoint_filepath,
             save_weights_only=True,
@@ -99,7 +100,7 @@ class CNN:
             mode='max',
             save_best_only=True)
 
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=f"./logs/train_data/model_{self.hash}",
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=f"{self.logs_dir}/model_{self.hash}",
                                                               update_freq='batch', histogram_freq=1)
 
         self.callbacks = [model_checkpoint_callback, tensorboard_callback]
@@ -133,7 +134,7 @@ class CNN:
         return self.model.evaluate(data['x_test'], data['y_test'], batch_size=batch_size)
 
     def train(self, data, batch_size=64, epochs=1):
-        if self.load_if_exist and os.path.exists(f'{CNN.MODEL_BASE_DIRECTORY}/model_{self.hash}/'):
+        if self.load_if_exist and os.path.exists(f'{self.checkpoint_dir}/model_{self.hash}/'):
             self.model.load_weights(self.checkpoint_filepath)
         else:
             if self.model is not None:

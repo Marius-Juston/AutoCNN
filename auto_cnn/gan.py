@@ -47,8 +47,14 @@ class AutoCNN:
                  mutation_probability: float = .2,
                  mutation_operation_distribution: Iterable[float] = None,
                  fitness_cache: str = 'fitness.json',
-                 extra_callbacks: Iterable[tf.keras.callbacks.Callback] = None):
+                 extra_callbacks: Iterable[tf.keras.callbacks.Callback] = None,
+                 logs_dir: str = './logs/train_data',
+                 checkpoint_dir: str = './checkpoints'
 
+                 ):
+
+        self.logs_dir = logs_dir
+        self.checkpoint_dir = checkpoint_dir
         self.extra_callbacks = extra_callbacks
         self.fitness_cache = fitness_cache
 
@@ -211,7 +217,8 @@ class AutoCNN:
 
     def generate_cnn(self, layers):
         return CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
-                   metrics=self.metrics, extra_callbacks=self.extra_callbacks)
+                   metrics=self.metrics, extra_callbacks=self.extra_callbacks, logs_dir=self.logs_dir,
+                   checkpoint_dir=self.checkpoint_dir)
 
     def environmental_selection(self, offsprings):
         whole_population = list(self.population)
