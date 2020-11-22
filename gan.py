@@ -201,13 +201,6 @@ class AutoCNN:
         return offsprings
 
     def environmental_selection(self, offsprings):
-        for cnn in offsprings:
-            if cnn.hash not in self.fitness:
-                # TODO make this work on multiple GPUs simultaneously
-                self.evaluate_individual_fitness(cnn)
-
-            print(self.fitness)
-
         whole_population = list(self.population)
         whole_population.extend(offsprings)
 
