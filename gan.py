@@ -255,7 +255,7 @@ class AutoCNN:
         print("Best CNN:", best_cnn, "Score:", self.fitness[best_cnn.hash])
 
 
-if __name__ == '__main__':
+def mnist_test():
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
     values = x_train.shape[0] // 2
@@ -264,3 +264,18 @@ if __name__ == '__main__':
 
     a = AutoCNN(5, 1, data)
     a.run()
+
+
+def cifar10_test():
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+
+    values = x_train.shape[0]
+
+    data = {'x_train': x_train[:values], 'y_train': y_train[:values], 'x_test': x_test, 'y_test': y_test}
+
+    a = AutoCNN(5, 1, data)
+    a.run()
+
+
+if __name__ == '__main__':
+    cifar10_test()
