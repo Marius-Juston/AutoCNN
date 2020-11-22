@@ -100,8 +100,7 @@ class AutoCNN:
                 else:
                     layers.append(self.random_pooling())
 
-            cnn = CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
-                      metrics=self.metrics)
+            cnn = self.generate_cnn(layers)
 
             self.population.append(cnn)
 
@@ -207,10 +206,13 @@ class AutoCNN:
                     else:
                         cnn[i] = self.random_pooling()
 
-        offsprings = [CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
-                          metrics=self.metrics) for layers in offsprings]
+        offsprings = [self.generate_cnn(layers) for layers in offsprings]
 
         return offsprings
+
+    def generate_cnn(self, layers):
+        return CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
+                   metrics=self.metrics, extra_callbacks=self.extra_callbacks)
 
     def environmental_selection(self, offsprings):
         whole_population = list(self.population)
