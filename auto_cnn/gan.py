@@ -12,6 +12,12 @@ from auto_cnn.cnn_structure import SkipLayer, PoolingLayer, CNN, Layer
 
 class AutoCNN:
     def get_input_shape(self) -> Tuple[int]:
+        """
+        Determines the input shape given the input data
+
+        :return: Returns the shape of the input, if the input is a gray scale image it adds another dimension
+        """
+
         shape = self.dataset['x_train'].shape[1:]
 
         if len(shape) < 3:
@@ -20,6 +26,17 @@ class AutoCNN:
         return shape
 
     def get_output_function(self) -> Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer]:
+        """
+        Creates a default output layer, this uses one hot encoding output for the network.
+
+        The function finds the number of unique values in the 'y_train' of the data and then generates a function that:
+
+        1. flattens the previous output
+        2. uses a dense layer with N number of unique 'y_train' outputs, adds a softmax activation in the end
+
+        :return: A simple output function
+        """
+
         output_size = np.unique(self.dataset['y_train']).shape[0]
 
         def output_function(inputs):
@@ -45,6 +62,25 @@ class AutoCNN:
                  logs_dir: str = './logs/train_data',
                  checkpoint_dir: str = './checkpoints'
                  ) -> None:
+        """
+        Initializes AutoCNN
+
+        :param population_size: the number of CNN for each generation
+        :param maximal_generation_number: the maximum number of generations
+        :param dataset: the data to pass in for training and testing, this is a dictionary with keys, 'x_train', 'y_train', 'x_test', 'y_test'
+        :param output_layer: the layer to append to the end of the CNN, this layer returns the output of the CNN
+        :param epoch_number: the number of epoch to train each CNN
+        :param optimizer: the optimizer to use for the CNNs
+        :param loss: the loss function to use for the CNNs
+        :param metrics: the metrics to use to quantify how good the CNN is
+        :param crossover_probability: the probability to mix two parent CNN
+        :param mutation_probability: the probability to mutate an offspring CNN
+        :param mutation_operation_distribution: the probability distribution to choose one of the 4 mutation operations
+        :param fitness_cache: the file location to save the fitness values
+        :param extra_callbacks: any other other callbacks to use when training the mode, this could be a learning rate scheduler
+        :param logs_dir: the directory where to store the Tensorboard logs
+        :param checkpoint_dir: the directory where to story the model checkpoints
+        """
 
         self.logs_dir = logs_dir
         self.checkpoint_dir = checkpoint_dir
@@ -83,6 +119,20 @@ class AutoCNN:
         self.input_shape = self.get_input_shape()
 
     def initialize(self) -> None:
+        """
+        Initializes the CNN population
+
+        Generates population_size CNNs by:
+
+        1. choosing an initial random depth between [1-5] layers
+        2. for each layer
+            1. choose a number between (0-1)
+            2. if the number < .5
+                * Generate a SkipLayer with random filter sizes
+            3. if the number >= .5
+                * Choose between a random max pooling or an average pooling layer
+        """
+
         self.population.clear()
 
         for _ in range(self.population_size):
@@ -103,11 +153,25 @@ class AutoCNN:
             self.population.append(cnn)
 
     def random_skip(self) -> SkipLayer:
+        """
+        Generates a randomly created SkipLayer
+
+        Randomly selects the two filter sizes for the convolution layers, these are power of two and between 32 and 512
+
+        :return: the randomly generated SkipLayer
+        """
+
         f1 = 2 ** random.randint(5, 9)
         f2 = 2 ** random.randint(5, 9)
         return SkipLayer(f1, f2)
 
     def random_pooling(self) -> PoolingLayer:
+        """
+        Randomly chooses with equal probability either a max or a mean pooling layer
+
+        :return: the randomly chosen pooling layer
+        """
+
         q = random.random()
 
         if q < .5:
