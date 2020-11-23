@@ -5,8 +5,6 @@ from typing import Iterable, Callable, Union, Sequence, Dict, Any, Tuple, List
 import tensorflow as tf
 from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
 
-tf.random.set_seed(42)
-
 
 class Layer(ABC):
     @abstractmethod

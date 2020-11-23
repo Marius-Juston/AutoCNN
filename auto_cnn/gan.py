@@ -3,17 +3,11 @@ import os
 import random
 from typing import Dict, Callable, Iterable, Union, Tuple, Sequence, Any, List
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
 
-tf.get_logger().setLevel('INFO')
-
 from auto_cnn.cnn_structure import SkipLayer, PoolingLayer, CNN, Layer
-
-random.seed(42)
 
 
 class AutoCNN:
@@ -271,29 +265,3 @@ class AutoCNN:
         best_cnn = sorted(self.population, key=lambda x: self.fitness[x.hash])[-1]
         print("Best CNN:", best_cnn, "Score:", self.fitness[best_cnn.hash])
         return best_cnn
-
-
-def mnist_test():
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-
-    values = x_train.shape[0] // 2
-
-    data = {'x_train': x_train[:values], 'y_train': y_train[:values], 'x_test': x_test, 'y_test': y_test}
-
-    a = AutoCNN(5, 1, data)
-    a.run()
-
-
-def cifar10_test():
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
-
-    values = x_train.shape[0]
-
-    data = {'x_train': x_train[:values], 'y_train': y_train[:values], 'x_test': x_test, 'y_test': y_test}
-
-    a = AutoCNN(20, 10, data, epoch_number=10)
-    a.run()
-
-
-if __name__ == '__main__':
-    cifar10_test()
