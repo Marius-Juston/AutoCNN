@@ -1,28 +1,34 @@
 import os
 from abc import abstractmethod, ABC
+from typing import Iterable, Callable, Union, Sequence, Dict, Any, Tuple
 
 import tensorflow as tf
+from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
 
 tf.random.set_seed(42)
 
 
 class Layer(ABC):
     @abstractmethod
-    def tensor_rep(self, inputs):
+    def tensor_rep(self, inputs: tf.keras.layers.Layer) -> tf.keras.layers.Layer:
         pass
 
 
 class SkipLayer(Layer):
     GROUP_NUMBER = 1
 
-    def __init__(self, feature_size1, feature_size2, kernel=(3, 3), stride=(1, 1), convolution='same'):
+    def __init__(self, feature_size1: int,
+                 feature_size2: int,
+                 kernel: Tuple[int, int] = (3, 3),
+                 stride: Tuple[int, int] = (1, 1),
+                 convolution: str = 'same'):
         self.convolution = convolution
         self.stride = stride
         self.kernel = kernel
         self.feature_size2 = feature_size2
         self.feature_size1 = feature_size1
 
-    def tensor_rep(self, inputs):
+    def tensor_rep(self, inputs: tf.keras.layers.Layer) -> tf.keras.layers.Activation:
         group_name = f'SkipLayer_{SkipLayer.GROUP_NUMBER}'
         SkipLayer.GROUP_NUMBER += 1
 
@@ -43,7 +49,7 @@ class SkipLayer(Layer):
         outputs = tf.keras.layers.add([inputs, skip_layer], name=f'{group_name}/Add')
         return tf.keras.layers.Activation('relu', name=f'{group_name}/ReLU2')(outputs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{self.feature_size1}-{self.feature_size2}'
 
 
@@ -53,22 +59,30 @@ class PoolingLayer(Layer):
         'mean': tf.keras.layers.AveragePooling2D
     }
 
-    def __init__(self, pooling_type, kernel=(2, 2), stride=(2, 2)):
+    def __init__(self, pooling_type: str, kernel: Tuple[int, int] = (2, 2), stride: Tuple[int, int] = (2, 2)):
         self.stride = stride
         self.kernel = kernel
         self.pooling_type = pooling_type
 
-    def tensor_rep(self, inputs):
+    def tensor_rep(self, inputs: tf.keras.layers.Layer) -> Union[
+        tf.keras.layers.MaxPool2D, tf.keras.layers.AveragePooling2D]:
         return PoolingLayer.pooling_choices[self.pooling_type](pool_size=self.kernel, strides=self.stride)(inputs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.pooling_type
 
 
 class CNN:
-    def __init__(self, input_shape, output_function, layers, optimizer=None,
-                 loss='sparse_categorical_crossentropy', metrics=('accuracy',), load_if_exist=True,
-                 extra_callbacks=None, logs_dir='./logs/train_data', checkpoint_dir='./checkpoints'):
+    def __init__(self, input_shape: Sequence[int],
+                 output_function: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer],
+                 layers: Sequence[Layer],
+                 optimizer: OptimizerV2 = None,
+                 loss: Union[str, tf.keras.losses.Loss] = 'sparse_categorical_crossentropy',
+                 metrics: Iterable[str] = ('accuracy',),
+                 load_if_exist: bool = True,
+                 extra_callbacks: Iterable[tf.keras.callbacks.Callback] = None,
+                 logs_dir: str = './logs/train_data',
+                 checkpoint_dir: str = './checkpoints') -> None:
         self.checkpoint_dir = checkpoint_dir
         self.logs_dir = logs_dir
         self.load_if_exist = load_if_exist
@@ -108,7 +122,7 @@ class CNN:
         if extra_callbacks is not None:
             self.callbacks.extend(extra_callbacks)
 
-    def generate(self):
+    def generate(self) -> tf.keras.Model:
         print(self.layers)
 
         if self.model is None:
@@ -130,10 +144,10 @@ class CNN:
             SkipLayer.GROUP_NUMBER = 1
         return self.model
 
-    def evaluate(self, data, batch_size=64):
+    def evaluate(self, data: Dict[str, Any], batch_size: int = 64) -> Tuple[float, float]:
         return self.model.evaluate(data['x_test'], data['y_test'], batch_size=batch_size)
 
-    def train(self, data, batch_size=64, epochs=1):
+    def train(self, data: Dict[str, Any], batch_size: int = 64, epochs: int = 1) -> None:
         if self.load_if_exist and os.path.exists(f'{self.checkpoint_dir}/model_{self.hash}/'):
             self.model.load_weights(self.checkpoint_filepath)
         else:
@@ -142,14 +156,14 @@ class CNN:
                                validation_split=.2,
                                callbacks=self.callbacks)
 
-    def generate_hash(self):
+    def generate_hash(self) -> str:
         return '-'.join(map(str, self.layers))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.hash
 
 
-def get_layer_from_string(layer_definition):
+def get_layer_from_string(layer_definition: str) -> Sequence[Layer]:
     layers_str: list = layer_definition.split('-')
 
     layers = []

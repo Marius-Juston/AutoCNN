@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from typing import Dict, Callable, Iterable, Union
+from typing import Dict, Callable, Iterable, Union, Tuple, Sequence, List
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -11,13 +11,13 @@ from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
 
 tf.get_logger().setLevel('INFO')
 
-from auto_cnn.cnn_structure import SkipLayer, PoolingLayer, CNN
+from auto_cnn.cnn_structure import SkipLayer, PoolingLayer, CNN, Layer
 
 random.seed(42)
 
 
 class AutoCNN:
-    def get_input_shape(self):
+    def get_input_shape(self) -> Tuple[int]:
         shape = self.dataset['x_train'].shape[1:]
 
         if len(shape) < 3:
@@ -25,7 +25,7 @@ class AutoCNN:
 
         return shape
 
-    def get_output_function(self):
+    def get_output_function(self) -> Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer]:
         output_size = np.unique(self.dataset['y_train']).shape[0]
 
         def output_function(inputs):
@@ -42,16 +42,15 @@ class AutoCNN:
                  epoch_number: int = 1,
                  optimizer: OptimizerV2 = tf.keras.optimizers.Adam(),
                  loss: Union[str, tf.keras.losses.Loss] = 'sparse_categorical_crossentropy',
-                 metrics=('accuracy',),
+                 metrics: Iterable[str] = ('accuracy',),
                  crossover_probability: float = .9,
                  mutation_probability: float = .2,
-                 mutation_operation_distribution: Iterable[float] = None,
+                 mutation_operation_distribution: Sequence[float] = None,
                  fitness_cache: str = 'fitness.json',
                  extra_callbacks: Iterable[tf.keras.callbacks.Callback] = None,
                  logs_dir: str = './logs/train_data',
                  checkpoint_dir: str = './checkpoints'
-
-                 ):
+                 ) -> None:
 
         self.logs_dir = logs_dir
         self.checkpoint_dir = checkpoint_dir
@@ -89,7 +88,7 @@ class AutoCNN:
 
         self.input_shape = self.get_input_shape()
 
-    def initialize(self):
+    def initialize(self) -> None:
         self.population.clear()
 
         for _ in range(self.population_size):
@@ -109,12 +108,12 @@ class AutoCNN:
 
             self.population.append(cnn)
 
-    def random_skip(self):
+    def random_skip(self) -> SkipLayer:
         f1 = 2 ** random.randint(5, 9)
         f2 = 2 ** random.randint(5, 9)
         return SkipLayer(f1, f2)
 
-    def random_pooling(self):
+    def random_pooling(self) -> PoolingLayer:
         q = random.random()
 
         if q < .5:
@@ -122,7 +121,7 @@ class AutoCNN:
         else:
             return PoolingLayer('mean')
 
-    def evaluate_fitness(self, population):
+    def evaluate_fitness(self, population: Iterable[CNN]) -> None:
         for cnn in population:
             if cnn.hash not in self.fitness:
                 # TODO make this work on multiple GPUs simultaneously
@@ -130,7 +129,7 @@ class AutoCNN:
 
             print(cnn, self.fitness[cnn.hash])
 
-    def evaluate_individual_fitness(self, cnn: CNN):
+    def evaluate_individual_fitness(self, cnn: CNN) -> None:
         try:
             cnn.generate()
 
@@ -146,7 +145,7 @@ class AutoCNN:
             with open(self.fitness_cache, 'w') as json_file:
                 json.dump(self.fitness, json_file)
 
-    def select_two_individuals(self, population):
+    def select_two_individuals(self, population: Sequence[CNN]) -> CNN:
         cnn1, cnn2 = random.sample(population, 2)
 
         if self.fitness[cnn1.hash] > self.fitness[cnn2.hash]:
@@ -154,12 +153,12 @@ class AutoCNN:
         else:
             return cnn2
 
-    def split_individual(self, cnn: CNN):
+    def split_individual(self, cnn: CNN) -> Tuple[List[Layer], List[Layer]]:
         split_index = random.randint(0, len(cnn.layers))
 
         return cnn.layers[:split_index], cnn.layers[split_index:]
 
-    def generate_offsprings(self):
+    def generate_offsprings(self) -> Sequence[CNN]:
         offsprings = []
 
         while len(offsprings) < len(self.population):
@@ -215,12 +214,12 @@ class AutoCNN:
 
         return offsprings
 
-    def generate_cnn(self, layers):
+    def generate_cnn(self, layers: Sequence[Layer]) -> CNN:
         return CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
                    metrics=self.metrics, extra_callbacks=self.extra_callbacks, logs_dir=self.logs_dir,
                    checkpoint_dir=self.checkpoint_dir)
 
-    def environmental_selection(self, offsprings):
+    def environmental_selection(self, offsprings: Sequence[CNN]) -> Iterable[CNN]:
         whole_population = list(self.population)
         whole_population.extend(offsprings)
 
@@ -243,7 +242,7 @@ class AutoCNN:
 
         return new_population
 
-    def run(self):
+    def run(self) -> CNN:
         print("Initializing Population")
         self.initialize()
         print("Population Initialization Done:", self.population)
@@ -271,6 +270,7 @@ class AutoCNN:
 
         best_cnn = sorted(self.population, key=lambda x: self.fitness[x.hash])[-1]
         print("Best CNN:", best_cnn, "Score:", self.fitness[best_cnn.hash])
+        return best_cnn
 
 
 def mnist_test():
