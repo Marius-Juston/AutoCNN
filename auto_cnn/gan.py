@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from typing import Dict, Callable, Iterable, Union, Tuple, Sequence, List
+from typing import Dict, Callable, Iterable, Union, Tuple, Sequence, Any, List
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -37,7 +37,7 @@ class AutoCNN:
 
     def __init__(self, population_size: int,
                  maximal_generation_number: int,
-                 dataset: Dict[str, np.ndarray],
+                 dataset: Dict[str, Any],
                  output_layer: Callable[[tf.keras.layers.Layer], tf.keras.layers.Layer] = None,
                  epoch_number: int = 1,
                  optimizer: OptimizerV2 = tf.keras.optimizers.Adam(),
@@ -153,12 +153,12 @@ class AutoCNN:
         else:
             return cnn2
 
-    def split_individual(self, cnn: CNN) -> Tuple[List[Layer], List[Layer]]:
+    def split_individual(self, cnn: CNN) -> Tuple[Sequence[Layer], Sequence[Layer]]:
         split_index = random.randint(0, len(cnn.layers))
 
         return cnn.layers[:split_index], cnn.layers[split_index:]
 
-    def generate_offsprings(self) -> Sequence[CNN]:
+    def generate_offsprings(self) -> List[CNN]:
         offsprings = []
 
         while len(offsprings) < len(self.population):
@@ -174,11 +174,11 @@ class AutoCNN:
                 p1_1, p1_2 = self.split_individual(p1)
                 p2_1, p2_2 = self.split_individual(p2)
 
-                p1_1.extend(p2_2)
-                p2_1.extend(p1_2)
+                o1 = [*p1_1, *p2_2]
+                o2 = [*p2_1, *p1_2]
 
-                offsprings.append(p1_1)
-                offsprings.append(p2_1)
+                offsprings.append(o1)
+                offsprings.append(o2)
             else:
                 offsprings.append(p1.layers)
                 offsprings.append(p2.layers)

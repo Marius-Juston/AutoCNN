@@ -1,6 +1,6 @@
 import os
 from abc import abstractmethod, ABC
-from typing import Iterable, Callable, Union, Sequence, Dict, Any, Tuple
+from typing import Iterable, Callable, Union, Sequence, Dict, Any, Tuple, List
 
 import tensorflow as tf
 from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
@@ -163,7 +163,7 @@ class CNN:
         return self.hash
 
 
-def get_layer_from_string(layer_definition: str) -> Sequence[Layer]:
+def get_layer_from_string(layer_definition: str) -> List[Layer]:
     layers_str: list = layer_definition.split('-')
 
     layers = []
