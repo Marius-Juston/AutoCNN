@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="auto_cnn",
-    version="0.0.1",
+    version="1.0",
     author="Marius Juston",
     author_email="marius.juston@hotmail.fr",
     description="Automatically designing CNN architectures using Genetic Algorithm for Image Classification "
