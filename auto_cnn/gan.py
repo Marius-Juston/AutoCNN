@@ -180,6 +180,12 @@ class AutoCNN:
             return PoolingLayer('mean')
 
     def evaluate_fitness(self, population: Iterable[CNN]) -> None:
+        """
+        Evaluates the fitness of each of the individuals in the population
+
+        :param population: the CNN population to evaluate the fitness on
+        """
+
         for cnn in population:
             if cnn.hash not in self.fitness:
                 # TODO make this work on multiple GPUs simultaneously
@@ -188,6 +194,16 @@ class AutoCNN:
             print(cnn, self.fitness[cnn.hash])
 
     def evaluate_individual_fitness(self, cnn: CNN) -> None:
+        """
+        Evaluates the fitness of the CNN. The fitness is based on the accuracy of the CNN on the test data.
+
+        Does not re-evaluate the fitness it is already in the fitness cache.
+
+        Once the fitness have been calculated adds it to the fitness cache and saves it to the fitness cache json
+
+        :param cnn: the CNN to find the fitness of
+        """
+
         try:
             cnn.generate()
 
@@ -204,6 +220,13 @@ class AutoCNN:
                 json.dump(self.fitness, json_file)
 
     def select_two_individuals(self, population: Sequence[CNN]) -> CNN:
+        """
+        Randomly selects two individuals without replacement and keeps the one with the largest fitness
+
+        :param population: the CNNs to choose the two CNNs from
+        :return: the CNN with the highest fitness
+        """
+
         cnn1, cnn2 = random.sample(population, 2)
 
         if self.fitness[cnn1.hash] > self.fitness[cnn2.hash]:
@@ -212,11 +235,45 @@ class AutoCNN:
             return cnn2
 
     def split_individual(self, cnn: CNN) -> Tuple[Sequence[Layer], Sequence[Layer]]:
+        """
+        Randomly splits the CNN layers into two
+
+        :param cnn: the CNN to split the layers
+        :return: the two parts of the CNN layers
+        """
         split_index = random.randint(0, len(cnn.layers))
 
         return cnn.layers[:split_index], cnn.layers[split_index:]
 
     def generate_offsprings(self) -> List[CNN]:
+        """
+        Generates the offsprings of the current population.
+
+        Steps:
+
+        1. While the offspring population is less than the current population size
+            1. randomly choose 2 different individuals from the current population and keep the one with the highest fitness
+            2. do the same as step 1, make sure the two are different
+            3. choose a random number between (0, 1)
+            4. If the number is less than the crossover_probability
+                1. randomly split the two parent CNNs
+                2. create two new offsprings by interchanging the two parent layers
+                3. add these to the offspring population
+            5. Else
+                1. add the two parents to the offsprings
+        2. Go through mutations
+            1. For each generated offspring
+                1. choose a random number between (0, 1)
+                2. if the number is less than the mutation_probability
+                    1. random select one of the 4 possible mutation given the mutation_operation_distribution distribution
+                    2. add_skip: adds a random skip layer, increases the complexity and depth of the network
+                    3. add_pooling: adds a random pooling layer, increases the depth but decrease the complexity
+                    4. remove: removed a layer, reduce complexity and depth
+                    5. change: changes the parameters of a layer (i.e filter size, max or mean pooling)
+
+        :return: the offsprings of the current generation
+        """
+
         offsprings = []
 
         while len(offsprings) < len(self.population):
@@ -273,11 +330,33 @@ class AutoCNN:
         return offsprings
 
     def generate_cnn(self, layers: Sequence[Layer]) -> CNN:
+        """
+        Generates CNN with AutoCNN parameters and the wanted layers
+
+        :param layers: layers to give the CNN
+        :return: the created CNN
+        """
+
         return CNN(self.input_shape, self.output_layer, layers, optimizer=self.optimizer, loss=self.loss,
                    metrics=self.metrics, extra_callbacks=self.extra_callbacks, logs_dir=self.logs_dir,
                    checkpoint_dir=self.checkpoint_dir)
 
     def environmental_selection(self, offsprings: Sequence[CNN]) -> Iterable[CNN]:
+        """
+        Select the new population from the offsprings and the current population
+
+        Steps:
+
+        1. Until the new population size is the same the previous one
+            * Select two individual with replacement
+            * add the best of the two to the new population
+        2. Check that the previous best CNN is in the new population
+            * if the previous best is not in the population remove the worst of the new population and replace it
+
+        :param offsprings: the offsprings of the generation
+        :return: the new population to use for the next generation
+        """
+
         whole_population = list(self.population)
         whole_population.extend(offsprings)
 
@@ -301,6 +380,21 @@ class AutoCNN:
         return new_population
 
     def run(self) -> CNN:
+        """
+        Runs through the whole Genetic Algorithm method
+
+        Steps:
+
+        1. Initialize the population
+        2. For maximal_generation_number of generations:
+            1. evaluate the fitness of the population
+            2. generate offsprings
+            3. evaluate the offspring fitness
+            4. select the new population from the offsprings and the current population
+
+        :return: the best CNN found after all the generations
+        """
+
         print("Initializing Population")
         self.initialize()
         print("Population Initialization Done:", self.population)
