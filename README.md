@@ -67,6 +67,12 @@ To do this the algorithm follows these steps:
         - if it is not replace the worst CNN by the best
 6. Repeat step 2. 
 
+### Installation
+
+```shell script
+pip install auto-cnn
+```
+
 ### Example
 
 ```python
