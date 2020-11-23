@@ -107,6 +107,12 @@ if __name__ == '__main__':
 
 Given these parameters the structure that was chosen was this:
 
+![MNIST Result](./images/mnist.jpg)
+
+CNN: 128-64
+
+Score (Test Accuracy): 0.9799000024795532
+
 ## Contributing
 
 If you have any idea on improving the performance, adding more customizations or correcting mistakes, please make a pull request or create an issue. I'd be happy to accept any contributions!
