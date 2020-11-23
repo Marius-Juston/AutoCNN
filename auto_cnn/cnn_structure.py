@@ -120,11 +120,19 @@ class CNN:
                  logs_dir: str = './logs/train_data',
                  checkpoint_dir: str = './checkpoints') -> None:
         """
-        Initializes the CNN
+        Initializes the CNN.
+
+        Example for an output layer function, that works with one hot encoded outputs:
+
+        >>> def output_function(inputs):
+        ...    out = tf.keras.layers.Flatten()(inputs) # flattens the input since it is going to be 3D tensor
+        ...
+        ...    return tf.keras.layers.Dense(10, activation='softmax')(out) # this is the final output layer
+
+        >>> CNN((28, 28, 1), output_function, []) # passes the function in without calling it
 
         :param input_shape: the input shape of the CNN input must be at least a size of 2
-        :param output_function: the output function to attach at the end of the layers, this will define what is
-        outputted by the CNN
+        :param output_function: the output function to attach at the end of the layers, this will define what is outputted by the CNN
         :param layers: the layer list to define the CNN
         :param optimizer: the type of optimizer to use when training the CNN
         :param loss: the loss function to use when training the CNN
@@ -224,8 +232,7 @@ class CNN:
         When training the model uses the TensorBoard and the ModelCheckpoint callbacks to log and save checkpoints of
         the model automatically. You are also able to add any other callbacks through the extra_callback parameters in the CNN __init__
 
-        :param data: the data to train the network on, this is a dict with parameters 'x_train' and 'y_train' which
-        contain the data that will be used in the training period of the model.
+        :param data: the data to train the network on, this is a dict with parameters 'x_train' and 'y_train' which contain the data that will be used in the training period of the model.
         :param batch_size: the batch size to train the network on
         :param epochs: the number of epochs to train the network
         """
