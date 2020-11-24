@@ -219,7 +219,7 @@ class AutoCNN:
                         cnns.append((cnn, d))
                         break
 
-        number_of_workers = multiprocessing.cpu_count()
+        number_of_workers = int(multiprocessing.cpu_count() * .75)
 
         with multiprocessing.Pool(number_of_workers) as pool:
             pool.map_async(AutoCNN.FitnessEvaluator(self.dataset, self.fitness_cache, self.epoch_number), cnns)
