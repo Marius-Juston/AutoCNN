@@ -195,7 +195,7 @@ class CNN:
             save_best_only=True)
 
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=f"{self.logs_dir}/model_{self.hash}",
-                                                              update_freq='batch', histogram_freq=1)
+                                                               histogram_freq=1)
 
         self.callbacks = [model_checkpoint_callback, tensorboard_callback]
 
