@@ -7,7 +7,7 @@ import numpy as np
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-from auto_cnn.cnn_structure import CNN, SkipLayer
+from auto_cnn.cnn_structure import CNN, SkipLayer, DefaultOutput
 import tensorflow as tf
 
 tf.get_logger().setLevel('INFO')
@@ -60,16 +60,6 @@ def f(x):
         json.dump(d, f)
 
 
-class OutputLayer:
-    def __init__(self, output_size):
-        self.output_size = output_size
-
-    def __call__(self, x):
-        x = tf.keras.layers.Flatten()(x)
-
-        return tf.keras.layers.Dense(self.output_size)(x)
-
-
 def parallel_processing():
     N = 5000
     data = {'x_train': np.random.random((N, 1, 2, 2)), 'y_train': np.random.randint(0, 10, N),
@@ -77,9 +67,9 @@ def parallel_processing():
 
     number_of_workers = mp.cpu_count()
 
-    a = [CNN((1, 2, 2), OutputLayer(10), [SkipLayer(512, 215)], load_if_exist=False),
-         CNN((1, 2, 2), OutputLayer(10), [SkipLayer(125, 23)], load_if_exist=False),
-         CNN((1, 2, 2), OutputLayer(10), [SkipLayer(512, 512)], load_if_exist=False)]
+    a = [CNN((1, 2, 2), DefaultOutput(10), [SkipLayer(512, 215)], load_if_exist=False),
+         CNN((1, 2, 2), DefaultOutput(10), [SkipLayer(125, 23)], load_if_exist=False),
+         CNN((1, 2, 2), DefaultOutput(10), [SkipLayer(512, 512)], load_if_exist=False)]
 
     manager = multiprocessing.Manager()
     d = manager.dict()

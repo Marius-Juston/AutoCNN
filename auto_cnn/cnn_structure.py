@@ -6,6 +6,27 @@ import tensorflow as tf
 from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
 
 
+class OutputLayer(ABC):
+    @abstractmethod
+    def get_output_function(self, inputs) -> tf.keras.layers.Layer:
+        pass
+
+    def __call__(self, inputs):
+        return self.get_output_function(inputs)
+
+
+class DefaultOutput(OutputLayer):
+
+    def __init__(self, output_size) -> None:
+        super().__init__()
+        self.output_size = output_size
+
+    def get_output_function(self, inputs) -> tf.keras.layers.Layer:
+        out = tf.keras.layers.Flatten()(inputs)
+
+        return tf.keras.layers.Dense(self.output_size, activation='softmax')(out)
+
+
 class Layer(ABC):
     @abstractmethod
     def tensor_rep(self, inputs: tf.keras.layers.Layer) -> tf.keras.layers.Layer:

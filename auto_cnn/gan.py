@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.optimizer_v2.optimizer_v2 import OptimizerV2
 
-from auto_cnn.cnn_structure import SkipLayer, PoolingLayer, CNN, Layer
+from auto_cnn.cnn_structure import SkipLayer, PoolingLayer, CNN, Layer, DefaultOutput
 
 
 class AutoCNN:
@@ -39,12 +39,7 @@ class AutoCNN:
 
         output_size = np.unique(self.dataset['y_train']).shape[0]
 
-        def output_function(inputs):
-            out = tf.keras.layers.Flatten()(inputs)
-
-            return tf.keras.layers.Dense(output_size, activation='softmax')(out)
-
-        return output_function
+        return DefaultOutput(output_size)
 
     def __init__(self, population_size: int,
                  maximal_generation_number: int,
