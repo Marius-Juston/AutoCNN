@@ -92,5 +92,15 @@ def parallel_processing():
     print(d)
 
 
+def multiprocess_evaluation():
+    N = 5000
+    data = {'x_train': np.random.random((N, 1, 2, 2)), 'y_train': np.random.randint(0, 10, N),
+            'x_test': np.random.random((N, 1, 2, 2)), 'y_test': np.random.randint(0, 10, N)}
+
+    a = AutoCNN(5, 1, data)
+    a.initialize()
+    a.evaluate_fitness(a.population)
+
+
 if __name__ == '__main__':
-    parallel_processing()
+    mnist_test()

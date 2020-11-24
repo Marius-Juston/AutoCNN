@@ -1,4 +1,5 @@
 import json
+import multiprocessing
 import os
 import random
 from typing import Dict, Callable, Iterable, Union, Tuple, Sequence, Any, List
@@ -11,6 +12,32 @@ from auto_cnn.cnn_structure import SkipLayer, PoolingLayer, CNN, Layer, DefaultO
 
 
 class AutoCNN:
+    class FitnessEvaluator:
+
+        def __init__(self, data, fitness_cache, epoch_number) -> None:
+            self.epoch_number = epoch_number
+            self.fitness_cache = fitness_cache
+            self.dataset = data
+
+        def __call__(self, data):
+            cnn, fitness = data
+
+            try:
+                cnn.generate()
+
+                cnn.train(self.dataset, epochs=self.epoch_number)
+                loss, accuracy = cnn.evaluate(self.dataset)
+            except ValueError as e:
+                print(e)
+                accuracy = 0
+
+            fitness[cnn.hash] = accuracy
+            fitness = dict(fitness)
+
+            if self.fitness_cache is not None:
+                with open(self.fitness_cache, 'w') as json_file:
+                    json.dump(fitness, json_file)
+
     def get_input_shape(self) -> Tuple[int]:
         """
         Determines the input shape given the input data
@@ -181,12 +208,29 @@ class AutoCNN:
         :param population: the CNN population to evaluate the fitness on
         """
 
-        for cnn in population:
-            if cnn.hash not in self.fitness:
-                # TODO make this work on multiple GPUs simultaneously
-                self.evaluate_individual_fitness(cnn)
+        manager = multiprocessing.Manager()
+        d = manager.dict(self.fitness)
 
-            print(cnn, self.fitness[cnn.hash])
+        cnns = []
+        for hash in set(cnn.hash for cnn in population):
+            if hash not in self.fitness:
+                for cnn in population:
+                    if cnn.hash == hash:
+                        cnns.append((cnn, d))
+                        break
+
+        number_of_workers = multiprocessing.cpu_count()
+
+        with multiprocessing.Pool(number_of_workers) as pool:
+            pool.map_async(AutoCNN.FitnessEvaluator(self.dataset, self.fitness_cache, self.epoch_number), cnns)
+            pool.close()
+            pool.join()
+
+        self.fitness = dict(d)
+
+        if self.fitness_cache is not None:
+            with open(self.fitness_cache, 'w') as json_file:
+                json.dump(self.fitness, json_file)
 
     def evaluate_individual_fitness(self, cnn: CNN) -> None:
         """

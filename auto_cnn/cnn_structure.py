@@ -259,7 +259,7 @@ class CNN:
         """
 
         if self.load_if_exist and os.path.exists(f'{self.checkpoint_dir}/model_{self.hash}/'):
-            self.model.load_weights(self.checkpoint_filepath)
+            self.model.load_weights(self.checkpoint_filepath).expect_partial()
         else:
             if self.model is not None:
                 self.model.fit(data['x_train'], data['y_train'], batch_size=batch_size, epochs=epochs,
