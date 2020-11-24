@@ -1,7 +1,13 @@
+import json
+import multiprocessing
+import multiprocessing as mp
 import os
+
+import numpy as np
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+from auto_cnn.cnn_structure import CNN, SkipLayer
 import tensorflow as tf
 
 tf.get_logger().setLevel('INFO')
@@ -36,5 +42,65 @@ def cifar10_test():
     a.run()
 
 
+def f(x):
+    cnn, d = x
+    cnn: CNN
+    data = d['data']
+
+    cnn.generate()
+    cnn.train(data)
+    a, b = cnn.evaluate(data)
+
+    d[cnn.hash] = b
+
+    d = dict(d)
+    d.pop('data')
+
+    with open("test.json", 'w') as f:
+        json.dump(d, f)
+
+
+class OutputLayer:
+    def __init__(self, output_size):
+        self.output_size = output_size
+
+    def __call__(self, x):
+        x = tf.keras.layers.Flatten()(x)
+
+        return tf.keras.layers.Dense(self.output_size)(x)
+
+
+def parallel_processing():
+    N = 5000
+    data = {'x_train': np.random.random((N, 1, 2, 2)), 'y_train': np.random.randint(0, 10, N),
+            'x_test': np.random.random((N, 1, 2, 2)), 'y_test': np.random.randint(0, 10, N)}
+
+    number_of_workers = mp.cpu_count()
+
+    a = [CNN((1, 2, 2), OutputLayer(10), [SkipLayer(512, 215)], load_if_exist=False),
+         CNN((1, 2, 2), OutputLayer(10), [SkipLayer(125, 23)], load_if_exist=False),
+         CNN((1, 2, 2), OutputLayer(10), [SkipLayer(512, 512)], load_if_exist=False)]
+
+    manager = multiprocessing.Manager()
+    d = manager.dict()
+    d['data'] = data
+
+    cnns = []
+    for hash in set(cnn.hash for cnn in a):
+        for cnn in a:
+            if cnn.hash == hash:
+                cnns.append((cnn, d))
+                break
+
+    print(number_of_workers)
+
+    with mp.Pool(number_of_workers) as pool:
+        pool.map_async(f, cnns)
+        pool.close()
+        pool.join()
+
+    print(d)
+
+
 if __name__ == '__main__':
-    mnist_test()
+    parallel_processing()
