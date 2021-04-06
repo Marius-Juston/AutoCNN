@@ -1,7 +1,23 @@
 # AutoCNN
 
+<p align="center">
+    <a href="https://github.com/Marius-Juston/AutoCNN/graphs/contributors" alt="Contributors">
+        <img src="https://img.shields.io/github/contributors/Marius-Juston/AutoCNN" /></a>
+    <a href="https://github.com/Marius-Juston/AutoCNN/pulse" alt="Activity">
+        <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/Marius-Juston/AutoCNN"></a>
+    <a href="https://github.com/Marius-Juston/AutoCNN/stargazers">
+        <img alt="Stars" src="https://img.shields.io/github/stars/Marius-Juston/AutoCNN"></a>
+    <a href="https://github.com/Marius-Juston/AutoCNN/network/members">
+        <img alt="Forks" src="https://img.shields.io/github/forks/Marius-Juston/AutoCNN"></a>
+    <a href="https://github.com/Marius-Juston/AutoCNN/issues">
+        <img alt="Issues" src="https://img.shields.io/github/issues/Marius-Juston/AutoCNN"></a>
+    <a href="./LICENSE" alt="Activity">
+        <img alt="GitHub" src="https://img.shields.io/github/license/Marius-Juston/AutoCNN"></a>
+</p>
+
+
 This project is an implementation of the paper ["Automatically Designing CNN Architectures Using
-Genetic Algorithm for Image Classification"](https://arxiv.org/pdf/1808.03818.pdf) 
+Genetic Algorithm for Image Classification"](https://paperswithcode.com/paper/automatically-designing-cnn-architectures) 
 
 ## How it works
 
